@@ -1,0 +1,20 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: kubespiffed
+  namespace: kubespiffe
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: kubespiffed
+  template:
+    metadata:
+      labels:
+        app: kubespiffed
+    spec:
+      serviceAccountName: default
+      containers:
+        - name: kubespiffed
+          image: kubespiffed:latest
+          imagePullPolicy: IfNotPresent
