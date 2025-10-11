@@ -1,0 +1,16 @@
+# kubespiffe
+
+An experimental Kubernetes-native implementation of the [SPIFFE standard](https://spiffe.io/).
+
+## Aims
+
+`kubespiffe` should be able to:
+
+* Issue SVIDs (both X.509 and JWT) to workloads on a Kubernetes cluster
+* Manage SVID issuance with Kubernetes resources
+* Support federation between two Kubernetes clusters
+
+with the constraints:
+
+* It should only have a single deployed component (i.e. a marked reduction in complexity from implementations like SPIRE, or `cert-manager` + `csi-driver-spiffe`)
+* It should not have a completely disqualifying security posture
