@@ -17,7 +17,7 @@ deploy: docker
 	kubectl apply -f ./deployment/kubespiffed/deployment.yaml --context kind-kubespiffe
 	kubectl apply -f ./deployment/workload/deployment.yaml --context kind-kubespiffe
 	kubectl rollout restart deployment -n kubespiffe kubespiffed
-	kubectl rollout restart deployment example-workload
+	kubectl rollout restart deployment workload
 
 kind:
 	kind delete cluster -n kubespiffe
