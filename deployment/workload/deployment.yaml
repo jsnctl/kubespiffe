@@ -27,12 +27,11 @@ spec:
               echo "Using token:"
               echo "$TOKEN"
               
-              RESULT=$(curl -s -k -H "Authorization: Bearer $TOKEN" \
-                  https://kubespiffed.kubespiffe.svc.cluster.local:8080/v1/svid)
+              RESULT=$(curl -s -k -H "Authorization: Bearer $TOKEN" kubespiffed.kubespiffe.svc.cluster.local:8080/v1/svid)
 
               echo "SVID result:"
               echo "$RESULT"
-              sleep 10
+              sleep 20
             done
         volumeMounts:
           - name: spiffe-token

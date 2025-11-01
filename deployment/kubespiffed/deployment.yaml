@@ -21,3 +21,6 @@ spec:
           env:
           - name: TRUST_DOMAIN
             value: "test.domain"
+          ports:
+            - containerPort: 8080
+              name: http

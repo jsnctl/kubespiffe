@@ -6,9 +6,6 @@ import (
 	"log/slog"
 	"net/http"
 	"os"
-
-	authv1 "k8s.io/api/authentication/v1"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
 const (
@@ -16,7 +13,8 @@ const (
 )
 
 func main() {
-	cs, err := getKubernetesClientset()
+	ctx := context.Background()
+	_, err := getKubernetesClientset()
 	if err != nil {
 		log.Fatalf("problem with k8s clientset")
 	}
@@ -27,21 +25,20 @@ func main() {
 			return
 		}
 
-		review := &authv1.TokenReview{
-			Spec: authv1.TokenReviewSpec{Token: token},
-		}
-
-		resp, err := cs.AuthenticationV1().TokenReviews().Create(
-			context.Background(), review, metav1.CreateOptions{},
-		)
-		if err != nil || !resp.Status.Authenticated {
-			http.Error(w, "unauthorized", http.StatusUnauthorized)
+		jwks, err := getKubernetesJWKS(ctx)
+		if err != nil {
+			slog.Error("problem with JWKS")
 			return
 		}
 
-		slog.Info("issuing svid...")
+		if err := verifyPSAT(token, jwks); err != nil {
+			slog.Error("problem with PSAT: %v", err)
+			return
+		}
+
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusOK)
+		w.Write([]byte("here's an SVID!"))
 	})
 
 	log.Fatal(http.ListenAndServe(":8080", nil))
