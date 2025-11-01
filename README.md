@@ -25,10 +25,11 @@ sequenceDiagram
 
     W->>K8S: Request PSAT (projected volume)
     K8S-->>W: Returns PSAT (JWT signed by Kubernetes)
-
+    
     W->>KS: Present PSAT
-    KS->>K8S: Validate PSAT via TokenReview API
-    K8S-->>KS: TokenReview response
+    KS->>K8S: Request JWKS (using regular SAT and ca.crt)
+    K8S-->>KS: Return JWKS
+    KS->>KS: Validate PSAT with JWKS
     KS-->>W: Return SVID (X.509 or JWT-SVID)
 ```
 
