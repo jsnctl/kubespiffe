@@ -30,6 +30,11 @@ sequenceDiagram
     KS->>K8S: Request JWKS (using regular SAT and ca.crt)
     K8S-->>KS: Return JWKS
     KS->>KS: Validate PSAT with JWKS
-    KS-->>W: Return SVID (X.509 or JWT-SVID)
+
+    KS->>K8S: Get Pod (kubenetes.io claim in PSAT)
+    K8S-->>KS: Pod metadata
+    KS->>KS: Check Pod labels for kubespiffe/enabled=true
+
+    KS-->>W: Issue SVID
 ```
 
