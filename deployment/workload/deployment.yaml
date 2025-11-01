@@ -1,0 +1,48 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: workload
+  namespace: default
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: workload
+  template:
+    metadata:
+      labels:
+        app: workload
+    spec:
+      serviceAccountName: default
+      containers:
+      - name: workload
+        image: curlimages/curl:7.88.1
+        imagePullPolicy: IfNotPresent
+        command: ["/bin/sh", "-c"]
+        args:
+          - |
+            while true; do
+              # Read PSAT token from projected volume
+              TOKEN=$(cat /var/run/secrets/tokens/kubespiffed-token)
+              echo "Using token:"
+              echo "$TOKEN"
+              
+              RESULT=$(curl -s -k -H "Authorization: Bearer $TOKEN" kubespiffed.kubespiffe.svc.cluster.local:8080/v1/svid)
+
+              echo "SVID result:"
+              echo "$RESULT"
+              sleep 20
+            done
+        volumeMounts:
+          - name: spiffe-token
+            mountPath: /var/run/secrets/tokens
+            readOnly: true
+      volumes:
+        - name: spiffe-token
+          projected:
+            sources:
+              - serviceAccountToken:
+                  path: kubespiffed-token
+                  audience: kubespiffed
+                  expirationSeconds: 3600
+

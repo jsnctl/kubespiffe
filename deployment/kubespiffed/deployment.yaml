@@ -18,3 +18,9 @@ spec:
         - name: kubespiffed
           image: kubespiffed:latest
           imagePullPolicy: IfNotPresent
+          env:
+          - name: TRUST_DOMAIN
+            value: "test.domain"
+          ports:
+            - containerPort: 8080
+              name: http
