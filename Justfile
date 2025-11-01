@@ -13,11 +13,16 @@ docker: build
 
 deploy: docker
 	kind load docker-image --name kubespiffe "kubespiffed:latest"
+	
 	kubectl create ns kubespiffe --context kind-kubespiffe || true
+	
 	kubectl apply -f ./deployment/kubespiffed/deployment.yaml --context kind-kubespiffe
 	kubectl apply -f ./deployment/kubespiffed/service.yaml --context kind-kubespiffe
 	kubectl apply -f ./deployment/kubespiffed/rbac.yaml --context kind-kubespiffe
+	
 	kubectl apply -f ./deployment/workload/deployment.yaml --context kind-kubespiffe
+	kubectl apply -f ./deployment/workload/unattested-deployment.yaml --context kind-kubespiffe
+	
 	kubectl rollout restart deployment -n kubespiffe kubespiffed
 	kubectl rollout restart deployment workload
 

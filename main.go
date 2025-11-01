@@ -14,7 +14,7 @@ const (
 
 func main() {
 	ctx := context.Background()
-	_, err := getKubernetesClientset()
+	cs, err := getKubernetesClientset()
 	if err != nil {
 		log.Fatalf("problem with k8s clientset")
 	}
@@ -31,11 +31,15 @@ func main() {
 			return
 		}
 
-		if err := verifyPSAT(token, jwks); err != nil {
-			slog.Error("problem with PSAT: %v", err)
+		claims, err := verifyPSAT(token, jwks)
+		if err != nil {
+			slog.Error("problem with PSAT", "error", err)
 			return
 		}
 
+		if err := attestPod(ctx, cs, claims["kubernetes.io"].(map[string]any)); err != nil {
+			slog.Info("❌ Pod rejected", "error", err)
+		}
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusOK)
 		w.Write([]byte("here's an SVID!"))
