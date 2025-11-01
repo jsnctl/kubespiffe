@@ -1,18 +1,18 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: workload
+  name: unattested-workload
   namespace: default
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: workload
+      app: unattested-workload
   template:
     metadata:
       labels:
-        app: workload
-        kubespiffe/enabled: "true"
+        app: unattested-workload
+        #kubespiffe/enabled: "true"
     spec:
       serviceAccountName: default
       containers:

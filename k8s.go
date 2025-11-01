@@ -10,12 +10,15 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"log/slog"
 	"math/big"
 	"net/http"
 	"os"
 	"time"
 
 	"github.com/golang-jwt/jwt/v5"
+	corev1 "k8s.io/api/core/v1"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/rest"
 )
@@ -98,28 +101,28 @@ func extractBearer(header string) string {
 	return ""
 }
 
-func verifyPSAT(psat string, jwks *JWKS) error {
+func verifyPSAT(psat string, jwks *JWKS) (map[string]any, error) {
 	audience := "kubespiffed"
 	parser := jwt.NewParser(jwt.WithoutClaimsValidation())
 	unverifiedPSAT, _, err := parser.ParseUnverified(psat, jwt.MapClaims{})
 	if err != nil {
-		return fmt.Errorf("parse unverified token: %w", err)
+		return nil, fmt.Errorf("parse unverified token: %w", err)
 	}
 
 	header := unverifiedPSAT.Header
 	kid, ok := header["kid"].(string)
 	if !ok {
-		return errors.New("missing kid in token header")
+		return nil, errors.New("missing kid in token header")
 	}
 
 	key, err := findKeyByKID(jwks, kid)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	pubKey, err := jwkToPublicKey(key)
 	if err != nil {
-		return fmt.Errorf("convert jwk to public key: %w", err)
+		return nil, fmt.Errorf("convert jwk to public key: %w", err)
 	}
 
 	verified, err := jwt.Parse(psat, func(t *jwt.Token) (interface{}, error) {
@@ -129,16 +132,16 @@ func verifyPSAT(psat string, jwks *JWKS) error {
 		return pubKey, nil
 	})
 	if err != nil {
-		return fmt.Errorf("token signature verification failed: %w", err)
+		return nil, fmt.Errorf("token signature verification failed: %w", err)
 	}
 
 	claims, ok := verified.Claims.(jwt.MapClaims)
 	if !ok {
-		return errors.New("invalid token claims")
+		return nil, errors.New("invalid token claims")
 	}
 
 	if iss, ok := claims["iss"].(string); !ok || iss != "https://kubernetes.default.svc.cluster.local" {
-		return fmt.Errorf("invalid issuer: %v", claims["iss"])
+		return nil, fmt.Errorf("invalid issuer: %v", claims["iss"])
 	}
 	if aud, ok := claims["aud"].([]interface{}); ok {
 		valid := false
@@ -149,16 +152,15 @@ func verifyPSAT(psat string, jwks *JWKS) error {
 			}
 		}
 		if !valid {
-			return fmt.Errorf("token audience %v does not include %q", aud, audience)
+			return nil, fmt.Errorf("token audience %v does not include %q", aud, audience)
 		}
 	}
 
 	if exp, ok := claims["exp"].(float64); ok && time.Unix(int64(exp), 0).Before(time.Now()) {
-		return fmt.Errorf("token expired at %v", time.Unix(int64(exp), 0))
+		return nil, fmt.Errorf("token expired at %v", time.Unix(int64(exp), 0))
 	}
 
-	fmt.Println("✅ PSAT successfully verified")
-	return nil
+	return claims, nil
 }
 
 func findKeyByKID(jwks *JWKS, kid string) (map[string]interface{}, error) {
@@ -199,4 +201,49 @@ func jwkToPublicKey(jwk map[string]interface{}) (*rsa.PublicKey, error) {
 		E: e,
 	}
 	return pub, nil
+}
+
+type KubernetesWorkloadClaims struct {
+	Namespace      string             `json:"namespace"`
+	Node           KubernetesResource `json:"node"`
+	Pod            KubernetesResource `json:"pod"`
+	ServiceAccount KubernetesResource `json:"serviceAccount"`
+}
+
+type KubernetesResource struct {
+	Name string `json:"name"`
+	UID  string `json:"uid"`
+}
+
+func attestPod(ctx context.Context, cs *kubernetes.Clientset, claims map[string]any) error {
+	b, err := json.Marshal(claims)
+	if err != nil {
+		return fmt.Errorf("marshal: %w", err)
+	}
+	var c KubernetesWorkloadClaims
+	if err := json.Unmarshal(b, &c); err != nil {
+		return err
+	}
+	pod, err := cs.CoreV1().Pods(c.Namespace).Get(ctx, c.Pod.Name, metav1.GetOptions{})
+	if err != nil {
+		return fmt.Errorf("failed to get pod %s/%s: %w", c.Namespace, c.Pod.Name, err)
+	}
+
+	if err := checkForLabel(pod, "kubespiffe/enabled", "true"); err != nil {
+		return fmt.Errorf("problem with labels: %w", err)
+	}
+
+	slog.Info("✅ Pod attested", "pod", c.Pod.Name, "namespace", c.Namespace)
+	return nil
+}
+
+func checkForLabel(pod *corev1.Pod, key, value string) error {
+	val, ok := pod.GetLabels()[key]
+	if !ok {
+		return fmt.Errorf("pod label does not exist")
+	}
+	if val != value {
+		return fmt.Errorf("pod value does not match expected")
+	}
+	return nil
 }
