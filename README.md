@@ -17,7 +17,8 @@ with the constraints:
 
 ## Obtaining an SVID
 
-```sequenceDiagram
+```mermaid
+sequenceDiagram
     participant W as Workload
     participant K8S as Kubernetes API
     participant KS as kubespiffed
