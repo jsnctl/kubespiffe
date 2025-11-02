@@ -1,0 +1,12 @@
+apiVersion: kubespiffe.io/v1alpha1
+kind: WorkloadRegistration
+metadata:
+  name: workload
+  namespace: default
+spec:
+  spiffeId: spiffe://example.org/ns/default/sa/default
+  selector:
+    namespace: default
+    serviceAccountName: default
+    podName: workload
+

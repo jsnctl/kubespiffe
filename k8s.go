@@ -14,9 +14,11 @@ import (
 	"math/big"
 	"net/http"
 	"os"
+	"strings"
 	"time"
 
 	"github.com/golang-jwt/jwt/v5"
+	"github.com/jsnctl/kubespiffe/pkg/generated/clientset/versioned"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes"
@@ -29,6 +31,14 @@ func getKubernetesClientset() (*kubernetes.Clientset, error) {
 		return nil, err
 	}
 	return kubernetes.NewForConfig(cfg)
+}
+
+func getKubespiffeClientset() (*versioned.Clientset, error) {
+	cfg, err := rest.InClusterConfig()
+	if err != nil {
+		return nil, err
+	}
+	return versioned.NewForConfig(cfg)
 }
 
 type JWKS struct {
@@ -215,7 +225,7 @@ type KubernetesResource struct {
 	UID  string `json:"uid"`
 }
 
-func attestPod(ctx context.Context, cs *kubernetes.Clientset, claims map[string]any) error {
+func attestPod(ctx context.Context, cs *kubernetes.Clientset, kscs *versioned.Clientset, claims map[string]any) error {
 	b, err := json.Marshal(claims)
 	if err != nil {
 		return fmt.Errorf("marshal: %w", err)
@@ -224,13 +234,13 @@ func attestPod(ctx context.Context, cs *kubernetes.Clientset, claims map[string]
 	if err := json.Unmarshal(b, &c); err != nil {
 		return err
 	}
-	pod, err := cs.CoreV1().Pods(c.Namespace).Get(ctx, c.Pod.Name, metav1.GetOptions{})
-	if err != nil {
-		return fmt.Errorf("failed to get pod %s/%s: %w", c.Namespace, c.Pod.Name, err)
-	}
 
-	if err := checkForLabel(pod, "kubespiffe/enabled", "true"); err != nil {
-		return fmt.Errorf("problem with labels: %w", err)
+	// Quick hacky prune of workload pod name in PSAT claim to test allow/deny policy
+	podName := strings.Split(c.Pod.Name, "-")[0]
+
+	_, err = kscs.KubespiffeV1alpha1().WorkloadRegistrations("").Get(ctx, podName, metav1.GetOptions{})
+	if err != nil {
+		return fmt.Errorf("failed to get registration for %s/%s: %w", c.Namespace, c.Pod.Name, err)
 	}
 
 	slog.Info("✅ Pod attested", "pod", c.Pod.Name, "namespace", c.Namespace)
