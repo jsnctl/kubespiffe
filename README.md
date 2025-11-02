@@ -31,9 +31,8 @@ sequenceDiagram
     K8S-->>KS: Return JWKS
     KS->>KS: Validate PSAT with JWKS
 
-    KS->>K8S: Get Pod (kubenetes.io claim in PSAT)
-    K8S-->>KS: Pod metadata
-    KS->>KS: Check Pod labels for kubespiffe/enabled=true
+    KS->>K8S: Get WorkloadRegistration (from kubenetes.io claim in PSAT)
+    K8S-->>KS: WorkloadRegistration (if exists)
 
     KS-->>W: Issue SVID
 ```
