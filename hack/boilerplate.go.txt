@@ -1,4 +1,4 @@
 /*
-Cofide Limited 2025
+The kubespiffe Authors 2025
 */
 
