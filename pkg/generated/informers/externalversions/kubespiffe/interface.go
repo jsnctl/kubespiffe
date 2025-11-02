@@ -7,8 +7,8 @@ Cofide Limited 2025
 package kubespiffe
 
 import (
-	internalinterfaces "github.com/cofide/trust-zone-operator/pkg/generated/informers/externalversions/internalinterfaces"
-	v1alpha1 "github.com/cofide/trust-zone-operator/pkg/generated/informers/externalversions/kubespiffe/v1alpha1"
+	internalinterfaces "github.com/jsnctl/kubespiffe/pkg/generated/informers/externalversions/internalinterfaces"
+	v1alpha1 "github.com/jsnctl/kubespiffe/pkg/generated/informers/externalversions/kubespiffe/v1alpha1"
 )
 
 // Interface provides access to each of this group's versions.

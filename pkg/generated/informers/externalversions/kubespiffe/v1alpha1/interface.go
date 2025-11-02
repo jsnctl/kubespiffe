@@ -7,7 +7,7 @@ Cofide Limited 2025
 package v1alpha1
 
 import (
-	internalinterfaces "github.com/cofide/trust-zone-operator/pkg/generated/informers/externalversions/internalinterfaces"
+	internalinterfaces "github.com/jsnctl/kubespiffe/pkg/generated/informers/externalversions/internalinterfaces"
 )
 
 // Interface provides access to all the informers in this group version.

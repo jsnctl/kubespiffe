@@ -7,9 +7,9 @@ Cofide Limited 2025
 package fake
 
 import (
-	clientset "github.com/cofide/trust-zone-operator/pkg/generated/clientset/versioned"
-	kubespiffev1alpha1 "github.com/cofide/trust-zone-operator/pkg/generated/clientset/versioned/typed/kubespiffe/v1alpha1"
-	fakekubespiffev1alpha1 "github.com/cofide/trust-zone-operator/pkg/generated/clientset/versioned/typed/kubespiffe/v1alpha1/fake"
+	clientset "github.com/jsnctl/kubespiffe/pkg/generated/clientset/versioned"
+	kubespiffev1alpha1 "github.com/jsnctl/kubespiffe/pkg/generated/clientset/versioned/typed/kubespiffe/v1alpha1"
+	fakekubespiffev1alpha1 "github.com/jsnctl/kubespiffe/pkg/generated/clientset/versioned/typed/kubespiffe/v1alpha1/fake"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/watch"

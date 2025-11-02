@@ -9,8 +9,8 @@ package v1alpha1
 import (
 	context "context"
 
-	scheme "github.com/cofide/trust-zone-operator/pkg/generated/clientset/versioned/scheme"
 	kubespiffev1alpha1 "github.com/jsnctl/kubespiffe/pkg/apis/kubespiffe/v1alpha1"
+	scheme "github.com/jsnctl/kubespiffe/pkg/generated/clientset/versioned/scheme"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	types "k8s.io/apimachinery/pkg/types"
 	watch "k8s.io/apimachinery/pkg/watch"

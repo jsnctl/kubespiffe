@@ -9,8 +9,8 @@ package v1alpha1
 import (
 	http "net/http"
 
-	scheme "github.com/cofide/trust-zone-operator/pkg/generated/clientset/versioned/scheme"
 	kubespiffev1alpha1 "github.com/jsnctl/kubespiffe/pkg/apis/kubespiffe/v1alpha1"
+	scheme "github.com/jsnctl/kubespiffe/pkg/generated/clientset/versioned/scheme"
 	rest "k8s.io/client-go/rest"
 )
 

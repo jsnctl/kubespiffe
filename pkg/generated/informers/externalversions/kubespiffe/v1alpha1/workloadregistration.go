@@ -10,10 +10,10 @@ import (
 	context "context"
 	time "time"
 
-	versioned "github.com/cofide/trust-zone-operator/pkg/generated/clientset/versioned"
-	internalinterfaces "github.com/cofide/trust-zone-operator/pkg/generated/informers/externalversions/internalinterfaces"
-	kubespiffev1alpha1 "github.com/cofide/trust-zone-operator/pkg/generated/listers/kubespiffe/v1alpha1"
 	apiskubespiffev1alpha1 "github.com/jsnctl/kubespiffe/pkg/apis/kubespiffe/v1alpha1"
+	versioned "github.com/jsnctl/kubespiffe/pkg/generated/clientset/versioned"
+	internalinterfaces "github.com/jsnctl/kubespiffe/pkg/generated/informers/externalversions/internalinterfaces"
+	kubespiffev1alpha1 "github.com/jsnctl/kubespiffe/pkg/generated/listers/kubespiffe/v1alpha1"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	runtime "k8s.io/apimachinery/pkg/runtime"
 	watch "k8s.io/apimachinery/pkg/watch"

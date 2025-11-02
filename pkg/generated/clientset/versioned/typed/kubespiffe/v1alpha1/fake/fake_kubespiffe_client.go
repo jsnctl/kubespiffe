@@ -7,7 +7,7 @@ Cofide Limited 2025
 package fake
 
 import (
-	v1alpha1 "github.com/cofide/trust-zone-operator/pkg/generated/clientset/versioned/typed/kubespiffe/v1alpha1"
+	v1alpha1 "github.com/jsnctl/kubespiffe/pkg/generated/clientset/versioned/typed/kubespiffe/v1alpha1"
 	rest "k8s.io/client-go/rest"
 	testing "k8s.io/client-go/testing"
 )

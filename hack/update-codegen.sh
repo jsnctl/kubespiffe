@@ -21,7 +21,7 @@ set -o pipefail
 SCRIPT_ROOT=$(dirname $(dirname "${BASH_SOURCE[0]}"))
 source "hack/kube_codegen.sh"
 
-THIS_PKG="github.com/cofide/trust-zone-operator"
+THIS_PKG="github.com/jsnctl/kubespiffe"
 
 kube::codegen::gen_helpers \
     --boilerplate "${SCRIPT_ROOT}/hack/boilerplate.go.txt" \

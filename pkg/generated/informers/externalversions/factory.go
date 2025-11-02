@@ -11,9 +11,9 @@ import (
 	sync "sync"
 	time "time"
 
-	versioned "github.com/cofide/trust-zone-operator/pkg/generated/clientset/versioned"
-	internalinterfaces "github.com/cofide/trust-zone-operator/pkg/generated/informers/externalversions/internalinterfaces"
-	kubespiffe "github.com/cofide/trust-zone-operator/pkg/generated/informers/externalversions/kubespiffe"
+	versioned "github.com/jsnctl/kubespiffe/pkg/generated/clientset/versioned"
+	internalinterfaces "github.com/jsnctl/kubespiffe/pkg/generated/informers/externalversions/internalinterfaces"
+	kubespiffe "github.com/jsnctl/kubespiffe/pkg/generated/informers/externalversions/kubespiffe"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	runtime "k8s.io/apimachinery/pkg/runtime"
 	schema "k8s.io/apimachinery/pkg/runtime/schema"
