@@ -1,6 +1,8 @@
 # kubespiffe
 
-An experimental Kubernetes-native implementation of the [SPIFFE standard](https://spiffe.io/). This exploratory project is an ongoing work-in-progress, and should not be used for workload identity in any environment (least of all production Kubernetes clusters).
+An experimental Kubernetes-native implementation of the [SPIFFE standard](https://spiffe.io/). 
+
+⚠️ This exploratory project is an ongoing work-in-progress, and should not be used for workload identity in any environment (least of all production Kubernetes clusters).
 
 ## Aims
 
