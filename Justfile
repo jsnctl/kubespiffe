@@ -1,6 +1,14 @@
 build:
 	GOOS=linux GOARCH=amd64 go build -o kubespiffed
 
+gen verb='':
+	#!/usr/bin/env bash
+	if [ "{{verb}}" = "verify" ]; then
+		./hack/verify-codegen.sh
+	else
+		./hack/update-codegen.sh
+	fi
+
 run: build
 	./kubespiffed
 
