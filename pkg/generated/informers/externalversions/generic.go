@@ -40,7 +40,7 @@ func (f *genericInformer) Lister() cache.GenericLister {
 // TODO extend this to unknown resources with a client pool
 func (f *sharedInformerFactory) ForResource(resource schema.GroupVersionResource) (GenericInformer, error) {
 	switch resource {
-	// Group=kubespiffe, Version=v1alpha1
+	// Group=kubespiffe.io, Version=v1alpha1
 	case v1alpha1.SchemeGroupVersion.WithResource("workloadregistrations"):
 		return &genericInformer{resource: resource.GroupResource(), informer: f.Kubespiffe().V1alpha1().WorkloadRegistrations().Informer()}, nil
 

@@ -16,7 +16,11 @@ func main() {
 	ctx := context.Background()
 	cs, err := getKubernetesClientset()
 	if err != nil {
-		log.Fatalf("problem with k8s clientset")
+		log.Fatalf("problem with k8s clientset: %v", err)
+	}
+	kscs, err := getKubespiffeClientset()
+	if err != nil {
+		log.Fatalf("problem with kubespiffe clientset: %v", err)
 	}
 	http.HandleFunc("/v1/svid", func(w http.ResponseWriter, r *http.Request) {
 		token := extractBearer(r.Header.Get("Authorization"))
@@ -37,7 +41,7 @@ func main() {
 			return
 		}
 
-		if err := attestPod(ctx, cs, claims["kubernetes.io"].(map[string]any)); err != nil {
+		if err := attestPod(ctx, cs, kscs, claims["kubernetes.io"].(map[string]any)); err != nil {
 			slog.Info("❌ Pod rejected", "error", err)
 		}
 		w.Header().Set("Content-Type", "application/json")

@@ -19,7 +19,7 @@ type KubespiffeV1alpha1Interface interface {
 	WorkloadRegistrationsGetter
 }
 
-// KubespiffeV1alpha1Client is used to interact with features provided by the kubespiffe group.
+// KubespiffeV1alpha1Client is used to interact with features provided by the kubespiffe.io group.
 type KubespiffeV1alpha1Client struct {
 	restClient rest.Interface
 }
