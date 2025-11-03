@@ -183,6 +183,9 @@ func findKeyByKID(jwks *JWKS, kid string) (map[string]interface{}, error) {
 }
 
 func jwkToPublicKey(jwk map[string]interface{}) (*rsa.PublicKey, error) {
+	// TODO: This can definitely be simplified with the Go JWT
+	// library API, this fn was original provided by Gemini and is likely
+	// to be over-engineered and potentially buggy
 	nStr, okN := jwk["n"].(string)
 	eStr, okE := jwk["e"].(string)
 	if !okN || !okE {
