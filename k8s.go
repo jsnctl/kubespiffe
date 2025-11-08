@@ -103,12 +103,12 @@ func loadCertPool(path string) (*x509.CertPool, error) {
 	return pool, nil
 }
 
-func extractBearer(header string) string {
-	prefix := "Bearer "
-	if len(header) > len(prefix) && header[:len(prefix)] == prefix {
-		return header[len(prefix):]
+func extractBearerToken(header string) string {
+	hasToken := strings.HasPrefix(header, "Bearer ")
+	if !hasToken {
+		return ""
 	}
-	return ""
+	return strings.TrimPrefix(header, "Bearer ")
 }
 
 func verifyPSAT(psat string, jwks *JWKS) (map[string]any, error) {

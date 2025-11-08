@@ -23,7 +23,7 @@ func main() {
 		log.Fatalf("problem with kubespiffe clientset: %v", err)
 	}
 	http.HandleFunc("/v1/svid", func(w http.ResponseWriter, r *http.Request) {
-		token := extractBearer(r.Header.Get("Authorization"))
+		token := extractBearerToken(r.Header.Get("Authorization"))
 		if token == "" {
 			http.Error(w, "missing bearer token", http.StatusUnauthorized)
 			return

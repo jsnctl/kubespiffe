@@ -41,7 +41,7 @@ func Test_extractBearer(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got := extractBearer(tt.header)
+			got := extractBearerToken(tt.header)
 			assert.Equal(t, got, tt.want)
 		})
 	}
