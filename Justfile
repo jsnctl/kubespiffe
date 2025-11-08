@@ -16,7 +16,7 @@ test:
 	go test ./...
 
 
-docker: build
+docker:
 	docker build -t kubespiffed .
 
 deploy: docker
