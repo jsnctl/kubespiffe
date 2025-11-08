@@ -5,13 +5,10 @@ import (
 	"crypto/rsa"
 	"crypto/tls"
 	"crypto/x509"
-	"encoding/base64"
-	"encoding/binary"
 	"encoding/json"
 	"errors"
 	"fmt"
 	"log/slog"
-	"math/big"
 	"net/http"
 	"os"
 	"strings"
@@ -19,6 +16,7 @@ import (
 
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/jsnctl/kubespiffe/pkg/generated/clientset/versioned"
+	"github.com/lestrrat-go/jwx/jwk"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes"
@@ -103,12 +101,12 @@ func loadCertPool(path string) (*x509.CertPool, error) {
 	return pool, nil
 }
 
-func extractBearer(header string) string {
-	prefix := "Bearer "
-	if len(header) > len(prefix) && header[:len(prefix)] == prefix {
-		return header[len(prefix):]
+func extractBearerToken(header string) string {
+	hasToken := strings.HasPrefix(header, "Bearer ")
+	if !hasToken {
+		return ""
 	}
-	return ""
+	return strings.TrimPrefix(header, "Bearer ")
 }
 
 func verifyPSAT(psat string, jwks *JWKS) (map[string]any, error) {
@@ -182,38 +180,23 @@ func findKeyByKID(jwks *JWKS, kid string) (map[string]interface{}, error) {
 	return nil, fmt.Errorf("no key found for kid: %s", kid)
 }
 
-func jwkToPublicKey(jwk map[string]interface{}) (*rsa.PublicKey, error) {
-	// TODO: This can definitely be simplified with the Go JWT
-	// library API, this fn was original provided by Gemini and is likely
-	// to be over-engineered and potentially buggy
-	nStr, okN := jwk["n"].(string)
-	eStr, okE := jwk["e"].(string)
-	if !okN || !okE {
-		return nil, errors.New("missing n or e in jwk")
-	}
-
-	nBytes, err := base64.RawURLEncoding.DecodeString(nStr)
+func jwkToPublicKey(keyMap map[string]interface{}) (*rsa.PublicKey, error) {
+	keyData, err := json.Marshal(keyMap)
 	if err != nil {
-		return nil, fmt.Errorf("decode n: %w", err)
+		return nil, fmt.Errorf("problem marshaling JWK: %w", err)
 	}
-	eBytes, err := base64.RawURLEncoding.DecodeString(eStr)
+
+	key, err := jwk.ParseKey(keyData)
 	if err != nil {
-		return nil, fmt.Errorf("decode e: %w", err)
+		return nil, fmt.Errorf("problem with parsing JWK: %w", err)
 	}
 
-	var e int
-	switch len(eBytes) {
-	case 3:
-		e = int(binary.BigEndian.Uint32(append([]byte{0}, eBytes...)))
-	default:
-		e = int(binary.BigEndian.Uint16(eBytes))
+	var publicKey rsa.PublicKey
+	if err := key.Raw(&publicKey); err != nil {
+		return nil, fmt.Errorf("problem extracting key: %w", err)
 	}
 
-	pub := &rsa.PublicKey{
-		N: new(big.Int).SetBytes(nBytes),
-		E: e,
-	}
-	return pub, nil
+	return &publicKey, nil
 }
 
 type KubernetesWorkloadClaims struct {
