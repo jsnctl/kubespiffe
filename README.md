@@ -44,3 +44,29 @@ sequenceDiagram
 2025/11/02 22:30:12 INFO ✅ Pod attested pod=workload-67c559dbb7-r5d5s namespace=default
 2025/11/02 22:30:13 INFO ❌ Pod rejected error="failed to get registration for default/unattested-5b77f9d8fc-7r5m7: workloadregistrations.kubespiffe.io \"unattested\" not found"
 ```
+
+## Development
+
+Run the tests
+
+```
+just test
+```
+
+Build the Docker image
+
+```
+just docker
+```
+
+Full KinD stack with `kubespiffed` and workloads can be spun up with:
+
+```
+just kind
+```
+
+and can be re-deployed with changes with:
+
+```
+just deploy
+```
