@@ -33,7 +33,7 @@ func main() {
 
 		jwks, err := k8s.GetKubernetesJWKS(ctx)
 		if err != nil {
-			slog.Error("problem with JWKS")
+			slog.Error("problem with JWKS", "error", err)
 			return
 		}
 
@@ -45,7 +45,9 @@ func main() {
 
 		if err := k8s.AttestPod(ctx, cs, kscs, claims["kubernetes.io"].(map[string]any)); err != nil {
 			slog.Info("❌ Pod rejected", "error", err)
+			return
 		}
+
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusOK)
 		w.Write([]byte("here's an SVID!"))
