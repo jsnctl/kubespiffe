@@ -1,4 +1,4 @@
-package main
+package k8s
 
 import (
 	"context"
@@ -23,7 +23,7 @@ import (
 	"k8s.io/client-go/rest"
 )
 
-func getKubernetesClientset() (*kubernetes.Clientset, error) {
+func GetKubernetesClientset() (*kubernetes.Clientset, error) {
 	cfg, err := rest.InClusterConfig()
 	if err != nil {
 		return nil, err
@@ -31,7 +31,7 @@ func getKubernetesClientset() (*kubernetes.Clientset, error) {
 	return kubernetes.NewForConfig(cfg)
 }
 
-func getKubespiffeClientset() (*versioned.Clientset, error) {
+func GetKubespiffeClientset() (*versioned.Clientset, error) {
 	cfg, err := rest.InClusterConfig()
 	if err != nil {
 		return nil, err
@@ -43,7 +43,7 @@ type JWKS struct {
 	Keys []map[string]interface{}
 }
 
-func getKubernetesJWKS(ctx context.Context) (*JWKS, error) {
+func GetKubernetesJWKS(ctx context.Context) (*JWKS, error) {
 	k8sJWKSEndpoint := "https://kubernetes.default.svc/openid/v1/jwks"
 	satPath := "/var/run/secrets/kubernetes.io/serviceaccount/token"
 	caPath := "/var/run/secrets/kubernetes.io/serviceaccount/ca.crt"
@@ -101,7 +101,7 @@ func loadCertPool(path string) (*x509.CertPool, error) {
 	return pool, nil
 }
 
-func extractBearerToken(header string) string {
+func ExtractBearerToken(header string) string {
 	hasToken := strings.HasPrefix(header, "Bearer ")
 	if !hasToken {
 		return ""
@@ -109,7 +109,7 @@ func extractBearerToken(header string) string {
 	return strings.TrimPrefix(header, "Bearer ")
 }
 
-func verifyPSAT(psat string, jwks *JWKS) (map[string]any, error) {
+func VerifyPSAT(psat string, jwks *JWKS) (map[string]any, error) {
 	audience := "kubespiffed"
 	parser := jwt.NewParser(jwt.WithoutClaimsValidation())
 	unverifiedPSAT, _, err := parser.ParseUnverified(psat, jwt.MapClaims{})
@@ -211,7 +211,7 @@ type KubernetesResource struct {
 	UID  string `json:"uid"`
 }
 
-func attestPod(ctx context.Context, cs *kubernetes.Clientset, kscs *versioned.Clientset, claims map[string]any) error {
+func AttestPod(ctx context.Context, cs *kubernetes.Clientset, kscs *versioned.Clientset, claims map[string]any) error {
 	b, err := json.Marshal(claims)
 	if err != nil {
 		return fmt.Errorf("marshal: %w", err)
