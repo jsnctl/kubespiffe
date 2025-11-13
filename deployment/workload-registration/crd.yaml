@@ -16,9 +16,12 @@ spec:
               type: object
               description: "Desired SPIFFE registration based on PSAT claims"
               properties:
-                spiffeId:
+                spiffeID:
                   type: string
                   description: "The SPIFFE ID to assign to matched workloads"
+                svidType:
+                  type: string
+                  description: "Type of the requested SVID"
                 selector:
                   type: object
                   description: "Selectors based on PSAT claims"

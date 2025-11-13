@@ -4,7 +4,8 @@ metadata:
   name: workload
   namespace: default
 spec:
-  spiffeId: spiffe://example.org/ns/default/sa/default
+  spiffeID: spiffe://example.org/ns/default/sa/default
+  svidType: X509
   selector:
     namespace: default
     serviceAccountName: default

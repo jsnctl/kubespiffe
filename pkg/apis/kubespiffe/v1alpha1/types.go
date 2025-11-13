@@ -18,8 +18,8 @@ type WorkloadRegistration struct {
 }
 
 type WorkloadRegistrationSpec struct {
-	TrustDomain string `json:"trustDomain"`
-	TrustZoneId string `json:"trustZoneId"`
+	SPIFFEID string `json:"spiffeID"`
+	SVIDType string `json:"svidType"`
 }
 
 type WorkloadRegistrationStatus struct{}
