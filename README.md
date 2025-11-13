@@ -35,8 +35,8 @@ sequenceDiagram
 
     KS->>K8S: Get WorkloadRegistration (from kubenetes.io claim in PSAT)
     K8S-->>KS: WorkloadRegistration (if exists)
-
-    Note over KS,W: TODO: SVID issuance & signing 
+    
+    KS->>KS: Generate workload keypair
     KS-->>W: Issue SVID
 ```
 
