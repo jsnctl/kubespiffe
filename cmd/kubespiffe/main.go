@@ -2,12 +2,14 @@ package main
 
 import (
 	"context"
+	"encoding/pem"
 	"log"
 	"log/slog"
 	"net/http"
 	"os"
 
 	"github.com/jsnctl/kubespiffe/pkg/k8s"
+	"github.com/jsnctl/kubespiffe/pkg/svid"
 )
 
 const (
@@ -24,6 +26,9 @@ func main() {
 	if err != nil {
 		log.Fatalf("problem with kubespiffe clientset: %v", err)
 	}
+
+	issuer := svid.NewSVIDIssuer()
+
 	http.HandleFunc("/v1/svid", func(w http.ResponseWriter, r *http.Request) {
 		token := k8s.ExtractBearerToken(r.Header.Get("Authorization"))
 		if token == "" {
@@ -50,9 +55,14 @@ func main() {
 		}
 		slog.Info("✅ Pod attested", "registration", wr.Name, "spec", wr.Spec)
 
+		svid, err := issuer.IssueX509SVID(wr)
+		if err != nil {
+			slog.Error("problem issuing SVID", "error", err)
+		}
+
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusOK)
-		w.Write([]byte("here's an SVID!"))
+		w.Write(pem.EncodeToMemory(&pem.Block{Type: "CERTIFICATE", Bytes: svid}))
 	})
 
 	log.Fatal(http.ListenAndServe(":8080", nil))
