@@ -8,13 +8,13 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"log/slog"
 	"net/http"
 	"os"
 	"strings"
 	"time"
 
 	"github.com/golang-jwt/jwt/v5"
+	"github.com/jsnctl/kubespiffe/pkg/apis/kubespiffe/v1alpha1"
 	"github.com/jsnctl/kubespiffe/pkg/generated/clientset/versioned"
 	"github.com/lestrrat-go/jwx/jwk"
 	corev1 "k8s.io/api/core/v1"
@@ -211,26 +211,24 @@ type KubernetesResource struct {
 	UID  string `json:"uid"`
 }
 
-func AttestPod(ctx context.Context, cs *kubernetes.Clientset, kscs *versioned.Clientset, claims map[string]any) error {
+func AttestPod(
+	ctx context.Context,
+	cs *kubernetes.Clientset,
+	kscs *versioned.Clientset,
+	claims map[string]any,
+) (*v1alpha1.WorkloadRegistration, error) {
 	b, err := json.Marshal(claims)
 	if err != nil {
-		return fmt.Errorf("marshal: %w", err)
+		return nil, fmt.Errorf("marshal: %w", err)
 	}
 	var c KubernetesWorkloadClaims
 	if err := json.Unmarshal(b, &c); err != nil {
-		return err
+		return nil, err
 	}
 
 	// Quick hacky prune of workload pod name in PSAT claim to test allow/deny policy
 	podName := strings.Split(c.Pod.Name, "-")[0]
-
-	_, err = kscs.KubespiffeV1alpha1().WorkloadRegistrations("").Get(ctx, podName, metav1.GetOptions{})
-	if err != nil {
-		return fmt.Errorf("failed to get registration for %s/%s: %w", c.Namespace, c.Pod.Name, err)
-	}
-
-	slog.Info("✅ Pod attested", "pod", c.Pod.Name, "namespace", c.Namespace)
-	return nil
+	return kscs.KubespiffeV1alpha1().WorkloadRegistrations("").Get(ctx, podName, metav1.GetOptions{})
 }
 
 func checkForLabel(pod *corev1.Pod, key, value string) error {

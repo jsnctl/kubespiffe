@@ -43,10 +43,12 @@ func main() {
 			return
 		}
 
-		if err := k8s.AttestPod(ctx, cs, kscs, claims["kubernetes.io"].(map[string]any)); err != nil {
+		wr, err := k8s.AttestPod(ctx, cs, kscs, claims["kubernetes.io"].(map[string]any))
+		if err != nil || wr == nil {
 			slog.Info("❌ Pod rejected", "error", err)
 			return
 		}
+		slog.Info("✅ Pod attested", "registration", wr.Name, "spec", wr.Spec)
 
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusOK)
