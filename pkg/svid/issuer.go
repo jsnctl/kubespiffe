@@ -18,6 +18,7 @@ import (
 type SVIDIssuer struct {
 	signer crypto.Signer
 	caCert *x509.Certificate
+	svids  map[string][]byte
 }
 
 func NewSVIDIssuer() (*SVIDIssuer, error) {
@@ -75,7 +76,13 @@ func (i *SVIDIssuer) IssueX509SVID(wr *v1alpha1.WorkloadRegistration) ([]byte, e
 		URIs:                  []*url.URL{mustParseSPIFFEID(wr.Spec.SPIFFEID)},
 		BasicConstraintsValid: true,
 	}
-	return x509.CreateCertificate(rand.Reader, svid, i.caCert, &key.PublicKey, i.signer)
+	svidBytes, err := x509.CreateCertificate(rand.Reader, svid, i.caCert, &key.PublicKey, i.signer)
+	if err != nil {
+		return nil, err
+	}
+
+	i.svids[wr.Spec.SPIFFEID] = svidBytes
+	return svidBytes, nil
 }
 
 func randomSerial() *big.Int {
