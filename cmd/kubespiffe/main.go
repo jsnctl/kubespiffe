@@ -27,7 +27,10 @@ func main() {
 		log.Fatalf("problem with kubespiffe clientset: %v", err)
 	}
 
-	issuer := svid.NewSVIDIssuer()
+	issuer, err := svid.NewSVIDIssuer()
+	if err != nil {
+		log.Fatalf("problem with issuer: %v", err)
+	}
 
 	http.HandleFunc("/v1/svid", func(w http.ResponseWriter, r *http.Request) {
 		token := k8s.ExtractBearerToken(r.Header.Get("Authorization"))

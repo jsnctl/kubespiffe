@@ -7,6 +7,7 @@ import (
 	"crypto/rand"
 	"crypto/x509"
 	"crypto/x509/pkix"
+	"fmt"
 	"math/big"
 	"net/url"
 	"time"
@@ -19,25 +20,47 @@ type SVIDIssuer struct {
 	caCert *x509.Certificate
 }
 
-func NewSVIDIssuer() *SVIDIssuer {
-	caKey, _ := ecdsa.GenerateKey(elliptic.P256(), rand.Reader)
+func NewSVIDIssuer() (*SVIDIssuer, error) {
+	caKey, err := createCAKey()
+	if err != nil {
+		return nil, fmt.Errorf("problem with CA key: %w", err)
+	}
 
-	caTmpl := &x509.Certificate{
+	caCert, err := createCACert(caKey)
+	if err != nil {
+		return nil, fmt.Errorf("problem with CA cert: %w", err)
+	}
+
+	return &SVIDIssuer{signer: caKey, caCert: caCert}, nil
+}
+
+func createCAKey() (*ecdsa.PrivateKey, error) {
+	return ecdsa.GenerateKey(elliptic.P256(), rand.Reader)
+}
+
+func createCACert(key *ecdsa.PrivateKey) (*x509.Certificate, error) {
+	format := &x509.Certificate{
 		SerialNumber:          big.NewInt(1),
-		Subject:               pkix.Name{CommonName: "kubespiffe-ca"},
+		Subject:               pkix.Name{CommonName: "kubespiffe"},
 		NotBefore:             time.Now(),
 		NotAfter:              time.Now().Add(24 * time.Hour),
 		IsCA:                  true,
 		KeyUsage:              x509.KeyUsageCertSign | x509.KeyUsageCRLSign,
 		BasicConstraintsValid: true,
 	}
-	caDER, _ := x509.CreateCertificate(rand.Reader, caTmpl, caTmpl, &caKey.PublicKey, caKey)
-	caCert, _ := x509.ParseCertificate(caDER)
 
-	return &SVIDIssuer{
-		signer: caKey,
-		caCert: caCert,
+	certBytes, err := x509.CreateCertificate(
+		rand.Reader,
+		format,
+		format,
+		&key.PublicKey,
+		key,
+	)
+	if err != nil {
+		return nil, err
 	}
+
+	return x509.ParseCertificate(certBytes)
 }
 
 func (i *SVIDIssuer) IssueX509SVID(wr *v1alpha1.WorkloadRegistration) ([]byte, error) {
