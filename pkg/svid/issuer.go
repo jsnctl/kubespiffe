@@ -32,7 +32,12 @@ func NewSVIDIssuer() (*SVIDIssuer, error) {
 		return nil, fmt.Errorf("problem with CA cert: %w", err)
 	}
 
-	return &SVIDIssuer{signer: caKey, caCert: caCert}, nil
+	svids := make(map[string][]byte)
+	return &SVIDIssuer{
+		signer: caKey,
+		caCert: caCert,
+		svids:  svids,
+	}, nil
 }
 
 func createCAKey() (*ecdsa.PrivateKey, error) {
