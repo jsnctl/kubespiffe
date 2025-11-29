@@ -9,17 +9,17 @@
 
 echo "Workload booting..."
 while true; do
-	# Read PSAT token from projected volume
-        TOKEN=$(cat /var/run/secrets/tokens/psat)
-        echo "Using PSAT:"
-        echo "$TOKEN"
+  # Read PSAT token from projected volume
+  TOKEN=$(cat /var/run/secrets/tokens/psat)
+  echo "Using PSAT:"
+  echo "$TOKEN"
               
-        RESULT=$(curl -s -k -H "Authorization: Bearer $TOKEN" kubespiffed.kubespiffe.svc.cluster.local:8080/v1/svid)
-        echo "Obtained X509-SVID:"
-        echo "$RESULT"
+  RESULT=$(curl -s -k -H "Authorization: Bearer $TOKEN" kubespiffed.kubespiffe.svc.cluster.local:8080/v1/svid)
+  echo "Obtained X509-SVID:"
+  echo "$RESULT"
 
-        echo "$RESULT" | openssl x509 -noout -ext subjectAltName
-        echo ""
-        sleep 20
+  echo "$RESULT" | openssl x509 -noout -ext subjectAltName
+  echo ""
+  sleep 20
 done
 
