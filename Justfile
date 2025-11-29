@@ -14,9 +14,11 @@ test:
 
 docker:
 	docker build -t kubespiffed .
+	docker build -t workload ./deployment/workload
 
 deploy: docker
 	kind load docker-image --name kubespiffe "kubespiffed:latest"
+	kind load docker-image --name kubespiffe "workload:latest"
 	
 	kubectl create ns kubespiffe --context kind-kubespiffe || true
 	
@@ -32,6 +34,7 @@ deploy: docker
 
 	kubectl rollout restart deployment -n kubespiffe kubespiffed
 	kubectl rollout restart deployment workload
+	kubectl rollout restart deployment unattested
 
 kind:
 	kind delete cluster -n kubespiffe

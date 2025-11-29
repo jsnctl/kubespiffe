@@ -17,23 +17,8 @@ spec:
       serviceAccountName: default
       containers:
       - name: workload
-        image: curlimages/curl:7.88.1
+        image: workload:latest
         imagePullPolicy: IfNotPresent
-        command: ["/bin/sh", "-c"]
-        args:
-          - |
-            while true; do
-              # Read PSAT token from projected volume
-              TOKEN=$(cat /var/run/secrets/tokens/psat)
-              echo "Using token:"
-              echo "$TOKEN"
-              
-              RESULT=$(curl -s -k -H "Authorization: Bearer $TOKEN" kubespiffed.kubespiffe.svc.cluster.local:8080/v1/svid)
-
-              echo "SVID result:"
-              echo "$RESULT"
-              sleep 20
-            done
         volumeMounts:
           - name: psat
             mountPath: /var/run/secrets/tokens
