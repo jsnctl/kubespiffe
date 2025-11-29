@@ -9,7 +9,6 @@
 
 echo "Workload booting..."
 while true; do
-
 	# Read PSAT token from projected volume
         TOKEN=$(cat /var/run/secrets/tokens/psat)
         echo "Using PSAT:"
