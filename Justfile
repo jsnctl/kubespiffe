@@ -28,6 +28,7 @@ deploy: docker
 	kubectl apply -f ./deployment/workload-registration/crd.yaml --context kind-kubespiffe
 	
 	kubectl apply -f ./deployment/workload/deployment.yaml --context kind-kubespiffe
+	kubectl apply -f ./deployment/workload/service.yaml --context kind-kubespiffe
 	kubectl apply -f ./deployment/workload/unattested-deployment.yaml --context kind-kubespiffe
 	
 	kubectl apply -f ./deployment/workload-registration/example.yaml --context kind-kubespiffe
@@ -35,6 +36,7 @@ deploy: docker
 	kubectl rollout restart deployment -n kubespiffe kubespiffed
 	kubectl rollout restart deployment workload
 	kubectl rollout restart deployment unattested
+	kubectl rollout restart deployment another-workload
 
 kind:
 	kind delete cluster -n kubespiffe

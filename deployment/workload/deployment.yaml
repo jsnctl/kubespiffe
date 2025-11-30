@@ -31,4 +31,43 @@ spec:
                   path: psat
                   audience: kubespiffed
                   expirationSeconds: 3600
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: another-workload
+  namespace: default
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: another-workload
+  template:
+    metadata:
+      labels:
+        app: another-workload
+        kubespiffe/enabled: "true"
+    spec:
+      serviceAccountName: default
+      containers:
+      - name: workload
+        image: workload:latest
+        imagePullPolicy: IfNotPresent
+        env:
+        - name: IS_SERVER
+          value: "true"
+        ports:
+        - containerPort: 8080
+        volumeMounts:
+          - name: psat
+            mountPath: /var/run/secrets/tokens
+            readOnly: true
+      volumes:
+        - name: psat
+          projected:
+            sources:
+              - serviceAccountToken:
+                  path: psat
+                  audience: kubespiffed
+                  expirationSeconds: 3600
 
