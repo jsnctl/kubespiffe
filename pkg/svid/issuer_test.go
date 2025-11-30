@@ -30,7 +30,7 @@ func TestIssueX509SVID(t *testing.T) {
 			SVIDType: "svid",
 		},
 	}
-	bytes, err := issuer.IssueX509SVID(wr)
+	bytes, _, err := issuer.IssueX509SVID(wr)
 
 	require.NoError(t, err)
 	assert.NotNil(t, bytes)

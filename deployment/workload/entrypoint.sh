@@ -15,10 +15,11 @@ while true; do
   echo "$TOKEN"
               
   RESULT=$(curl -s -k -H "Authorization: Bearer $TOKEN" kubespiffed.kubespiffe.svc.cluster.local:8080/v1/svid)
+  X509=$(echo "$RESULT" | jq -r '.x509_svid' | base64 -d)
   echo "Obtained X509-SVID:"
-  echo "$RESULT"
+  echo "$X509"
 
-  echo "$RESULT" | openssl x509 -noout -ext subjectAltName
+  echo "$X509" | openssl x509 -noout -ext subjectAltName
   echo ""
   sleep 20
 done

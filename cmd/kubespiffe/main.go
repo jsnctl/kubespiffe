@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"encoding/json"
 	"encoding/pem"
 	"log"
 	"log/slog"
@@ -58,14 +59,20 @@ func main() {
 		}
 		slog.Info("✅ Pod attested", "registration", wr.Name, "spec", wr.Spec)
 
-		svid, err := issuer.IssueX509SVID(wr)
+		svid, svidKey, err := issuer.IssueX509SVID(wr)
 		if err != nil {
 			slog.Error("problem issuing SVID", "error", err)
 		}
 
+		resp := map[string]any{
+			"x509_svid":     pem.EncodeToMemory(&pem.Block{Type: "CERTIFICATE", Bytes: svid}),
+			"x509_svid_key": pem.EncodeToMemory(&pem.Block{Type: "PRIVATE KEY", Bytes: svidKey}),
+			"bundle":        pem.EncodeToMemory(&pem.Block{Type: "CERTIFICATE", Bytes: issuer.GetCACert()}),
+		}
+
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusOK)
-		w.Write(pem.EncodeToMemory(&pem.Block{Type: "CERTIFICATE", Bytes: svid}))
+		json.NewEncoder(w).Encode(resp)
 	})
 
 	log.Fatal(http.ListenAndServe(":8080", nil))

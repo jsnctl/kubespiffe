@@ -69,7 +69,7 @@ func createCACert(key *ecdsa.PrivateKey) (*x509.Certificate, error) {
 	return x509.ParseCertificate(certBytes)
 }
 
-func (i *SVIDIssuer) IssueX509SVID(wr *v1alpha1.WorkloadRegistration) ([]byte, error) {
+func (i *SVIDIssuer) IssueX509SVID(wr *v1alpha1.WorkloadRegistration) ([]byte, []byte, error) {
 	key, _ := ecdsa.GenerateKey(elliptic.P256(), rand.Reader)
 	svid := &x509.Certificate{
 		SerialNumber:          randomSerial(),
@@ -83,11 +83,20 @@ func (i *SVIDIssuer) IssueX509SVID(wr *v1alpha1.WorkloadRegistration) ([]byte, e
 	}
 	svidBytes, err := x509.CreateCertificate(rand.Reader, svid, i.caCert, &key.PublicKey, i.signer)
 	if err != nil {
-		return nil, err
+		return nil, nil, err
+	}
+
+	svidKeyBytes, err := x509.MarshalPKCS8PrivateKey(key)
+	if err != nil {
+		return nil, nil, err
 	}
 
 	i.svids[wr.Spec.SPIFFEID] = svidBytes
-	return svidBytes, nil
+	return svidBytes, svidKeyBytes, nil
+}
+
+func (i *SVIDIssuer) GetCACert() []byte {
+	return i.caCert.Raw
 }
 
 func randomSerial() *big.Int {
