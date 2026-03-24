@@ -25,13 +25,14 @@ deploy: docker
 	kubectl apply -f ./deployment/kubespiffed/deployment.yaml --context kind-kubespiffe
 	kubectl apply -f ./deployment/kubespiffed/service.yaml --context kind-kubespiffe
 	kubectl apply -f ./deployment/kubespiffed/rbac.yaml --context kind-kubespiffe
-	kubectl apply -f ./deployment/workload-registration/crd.yaml --context kind-kubespiffe
 	
+	kubectl apply -f ./deployment/workload-registration/crd.yaml --context kind-kubespiffe
+	kubectl apply -f ./deployment/workload-registration/example.yaml --context kind-kubespiffe
+
+	kubectl apply -f ./deployment/workload/serviceaccounts.yaml --context kind-kubespiffe
 	kubectl apply -f ./deployment/workload/deployment.yaml --context kind-kubespiffe
 	kubectl apply -f ./deployment/workload/service.yaml --context kind-kubespiffe
 	kubectl apply -f ./deployment/workload/unattested-deployment.yaml --context kind-kubespiffe
-	
-	kubectl apply -f ./deployment/workload-registration/example.yaml --context kind-kubespiffe
 
 	kubectl rollout restart deployment -n kubespiffe kubespiffed
 	kubectl rollout restart deployment workload

@@ -52,7 +52,7 @@ func main() {
 			return
 		}
 
-		wr, err := k8s.AttestPod(ctx, cs, kscs, claims["kubernetes.io"].(map[string]any))
+		wr, err := k8s.AttestPod(ctx, cs, kscs, claims)
 		if err != nil || wr == nil {
 			slog.Info("❌ Pod rejected", "error", err)
 			return

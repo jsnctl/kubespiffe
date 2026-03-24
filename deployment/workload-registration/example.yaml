@@ -2,25 +2,20 @@ apiVersion: kubespiffe.io/v1alpha1
 kind: WorkloadRegistration
 metadata:
   name: workload
-  namespace: default
 spec:
-  spiffeID: spiffe://example.org/ns/default/sa/default
+  spiffeID: spiffe://example.org/ns/default/sa/workload-sa
   svidType: X509
   selector:
     namespace: default
-    serviceAccountName: default
-    podName: workload
+    serviceAccountName: workload-sa
 ---
 apiVersion: kubespiffe.io/v1alpha1
 kind: WorkloadRegistration
 metadata:
-  name: another
-  namespace: default
+  name: another-workload
 spec:
-  spiffeID: spiffe://example.org/ns/default/sa/default
+  spiffeID: spiffe://example.org/app/another-workload
   svidType: X509
   selector:
     namespace: default
-    serviceAccountName: default
-    podName: another
-
+    serviceAccountName: another-workload-sa

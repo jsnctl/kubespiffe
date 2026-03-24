@@ -17,7 +17,6 @@ import (
 	"github.com/jsnctl/kubespiffe/pkg/apis/kubespiffe/v1alpha1"
 	"github.com/jsnctl/kubespiffe/pkg/generated/clientset/versioned"
 	"github.com/lestrrat-go/jwx/jwk"
-	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/rest"
@@ -203,7 +202,7 @@ type KubernetesWorkloadClaims struct {
 	Namespace      string             `json:"namespace"`
 	Node           KubernetesResource `json:"node"`
 	Pod            KubernetesResource `json:"pod"`
-	ServiceAccount KubernetesResource `json:"serviceAccount"`
+	ServiceAccount KubernetesResource `json:"serviceaccount"`
 }
 
 type KubernetesResource struct {
@@ -214,30 +213,48 @@ type KubernetesResource struct {
 func AttestPod(
 	ctx context.Context,
 	cs *kubernetes.Clientset,
-	kscs *versioned.Clientset,
+	kscs versioned.Interface,
 	claims map[string]any,
 ) (*v1alpha1.WorkloadRegistration, error) {
-	b, err := json.Marshal(claims)
+	k8sClaims, ok := claims["kubernetes.io"]
+	if !ok {
+		return nil, fmt.Errorf("missing kubernetes.io claims in token")
+	}
+	b, err := json.Marshal(k8sClaims)
 	if err != nil {
-		return nil, fmt.Errorf("marshal: %w", err)
+		return nil, fmt.Errorf("marshal kubernetes.io claims: %w", err)
 	}
 	var c KubernetesWorkloadClaims
 	if err := json.Unmarshal(b, &c); err != nil {
-		return nil, err
+		return nil, fmt.Errorf("unmarshal kubernetes.io claims: %w", err)
 	}
 
-	// Quick hacky prune of workload pod name in PSAT claim to test allow/deny policy
-	podName := strings.Split(c.Pod.Name, "-")[0]
-	return kscs.KubespiffeV1alpha1().WorkloadRegistrations("").Get(ctx, podName, metav1.GetOptions{})
+	list, err := kscs.KubespiffeV1alpha1().WorkloadRegistrations("").List(ctx, metav1.ListOptions{})
+	if err != nil {
+		return nil, fmt.Errorf("listing WorkloadRegistrations: %w", err)
+	}
+
+	for i := range list.Items {
+		wreg := &list.Items[i]
+		if selectorMatches(wreg.Spec.Selector, c) {
+			return wreg, nil
+		}
+	}
+
+	return nil, fmt.Errorf("no WorkloadRegistration matches pod %s/%s (sa: %s)",
+		c.Namespace, c.Pod.Name, c.ServiceAccount.Name)
 }
 
-func checkForLabel(pod *corev1.Pod, key, value string) error {
-	val, ok := pod.GetLabels()[key]
-	if !ok {
-		return fmt.Errorf("pod label does not exist")
+// selectorMatches returns true if all non-empty WorkloadRegistrationSelector fields match the claims
+func selectorMatches(sel v1alpha1.WorkloadRegistrationSelector, c KubernetesWorkloadClaims) bool {
+	if sel.Namespace != "" && sel.Namespace != c.Namespace {
+		return false
 	}
-	if val != value {
-		return fmt.Errorf("pod value does not match expected")
+	if sel.ServiceAccountName != "" && sel.ServiceAccountName != c.ServiceAccount.Name {
+		return false
 	}
-	return nil
+	if sel.PodName != "" && sel.PodName != c.Pod.Name {
+		return false
+	}
+	return true
 }

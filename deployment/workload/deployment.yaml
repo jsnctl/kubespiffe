@@ -14,7 +14,7 @@ spec:
         app: workload
         kubespiffe/enabled: "true"
     spec:
-      serviceAccountName: default
+      serviceAccountName: workload-sa
       containers:
       - name: workload
         image: workload:latest
@@ -48,7 +48,7 @@ spec:
         app: another-workload
         kubespiffe/enabled: "true"
     spec:
-      serviceAccountName: default
+      serviceAccountName: another-workload-sa
       containers:
       - name: workload
         image: workload:latest
