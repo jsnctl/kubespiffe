@@ -18,8 +18,17 @@ type WorkloadRegistration struct {
 }
 
 type WorkloadRegistrationSpec struct {
-	SPIFFEID string `json:"spiffeID"`
-	SVIDType string `json:"svidType"`
+	SPIFFEID string                       `json:"spiffeID"`
+	SVIDType string                       `json:"svidType"`
+	Selector WorkloadRegistrationSelector `json:"selector,omitempty"`
+}
+
+// WorkloadRegistrationSelector constrains which pods may receive an SVID.
+// Each field is optional; an empty field matches any value.
+type WorkloadRegistrationSelector struct {
+	Namespace          string `json:"namespace,omitempty"`
+	ServiceAccountName string `json:"serviceAccountName,omitempty"`
+	PodName            string `json:"podName,omitempty"`
 }
 
 type WorkloadRegistrationStatus struct{}
