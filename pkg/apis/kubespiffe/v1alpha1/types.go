@@ -23,8 +23,8 @@ type WorkloadRegistrationSpec struct {
 	Selector WorkloadRegistrationSelector `json:"selector,omitempty"`
 }
 
-// WorkloadRegistrationSelector constrains which pods may receive an SVID.
-// Each field is optional; an empty field matches any value.
+// WorkloadRegistrationSelector constrains which Pods recieve an SVID from kubespiffe
+// Each field is optional; an empty field matches any value
 type WorkloadRegistrationSelector struct {
 	Namespace          string `json:"namespace,omitempty"`
 	ServiceAccountName string `json:"serviceAccountName,omitempty"`

@@ -245,7 +245,7 @@ func AttestPod(
 		c.Namespace, c.Pod.Name, c.ServiceAccount.Name)
 }
 
-// selectorMatches returns true if all non-empty selector fields match the claims.
+// selectorMatches returns true if all non-empty WorkloadRegistrationSelector fields match the claims
 func selectorMatches(sel v1alpha1.WorkloadRegistrationSelector, c KubernetesWorkloadClaims) bool {
 	if sel.Namespace != "" && sel.Namespace != c.Namespace {
 		return false
